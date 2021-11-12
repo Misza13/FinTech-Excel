@@ -11,24 +11,31 @@
         internal static readonly DeribitSocket DeribitSocket = new DeribitSocket();
 
         [ExcelFunction(
-            Name = "DERIBIT.TICKER",
+            Name = "Deribit.GetTicker",
             Description = "Get ticker data from Deribit")]
         public static object GetTicker(
             [ExcelArgument(
-                Name = "INSTRUMENT_NAME",
+                Name = "InstrumentName",
                 Description = "Name of instrument on Deribit")]
             string instrumentName,
             
             [ExcelArgument(
-                Name = "TICKER_ATTRIBUTES",
-                Description = "Comma-separated list of properties to return")]
-            string tickerAttributes,
+                Name = "TickerAttributes",
+                Description = "List of properties to return (Range or comma-separated list)")]
+            object tickerAttributesIn,
             
             int updateInterval, //TODO: handle non-positive values
             
             bool spillVertically) //TODO: handle
         {
-            var observableId = $"{instrumentName}({tickerAttributes})@{updateInterval}/{spillVertically}";
+            var tickerAttributes = tickerAttributesIn switch
+            {
+                string s => s.Split(','),
+                object[,] ss => ss.Cast<string>().ToArray(),
+                _ => throw new ArgumentException()
+            };
+            
+            var observableId = $"{instrumentName}({string.Join(",", tickerAttributes)})@{updateInterval}/{spillVertically}";
             
             return RxExcel.Observe(
                 observableId,
@@ -37,13 +44,12 @@
                     .Select(async _ =>
                     {
                         var ticker = await DeribitSocket.GetTickerRaw(instrumentName);
-                        var result = ticker["result"];
-                        var rresult = tickerAttributes.Split(',')
-                            .Select(attrName => result.SelectToken(attrName))
+                        var result = tickerAttributes
+                            .Select(attrName => ticker.SelectToken("result." + attrName))
                             .Cast<JValue>()
                             .Select(v => v.Value)
                             .ToArray();
-                        return rresult;
+                        return result;
                     })
                     .Concat()
                 );
