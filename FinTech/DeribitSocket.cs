@@ -54,6 +54,15 @@
             return await handler.Task;
         }
 
+        public async Task<decimal> GetIndexPrice(string indexName)
+        {
+            var request = new DeribitGetIndexRequest(indexName);
+            var handler = new ResponseHandlerBase<DeribitGetIndexPriceResponse>();
+            await Send(request, handler);
+            var response = await handler.Task;
+            return response.result.index_price;
+        }
+
         private async Task Send(IHasId request, IResponseHandler handler)
         {
             lock (_requestIdLock)

@@ -78,5 +78,45 @@
                 null,
                 () => observableSource);
         }
+
+        [ExcelFunction(
+            Name = "Deribit.IndexPrice",
+            Description = "Retrieve the current index price value for given index name.")]
+        public static object GetIndexPrice(
+            [ExcelArgument(
+                Name = "IndexName",
+                Description = "Index identifier, one of: btc_usd, eth_usd, btc_usdt, eth_usdt")]
+            string indexName,
+            
+            [ExcelArgument(
+                Name = "UpdateInterval",
+                Description = "Update interval (in seconds) - 0 to disable")]
+            int updateInterval)
+        {
+            async Task<decimal> FetchIndexPrice(long _)
+            {
+                return await DeribitSocket.GetIndexPrice(indexName);
+            }
+            
+            var observableId = $"GetIndexPrice({indexName}, {updateInterval})";
+
+            IObservable<decimal> observableSource;
+
+            if (updateInterval > 0)
+            {
+                observableSource = Observable.Timer(TimeSpan.Zero, TimeSpan.FromSeconds(updateInterval))
+                    .Select(FetchIndexPrice)
+                    .Concat();
+            }
+            else
+            {
+                observableSource = Observable.FromAsync(async () => await FetchIndexPrice(0));
+            }
+
+            return RxExcel.Observe(
+                observableId,
+                null,
+                () => observableSource);
+        }
     }
 }
