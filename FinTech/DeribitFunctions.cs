@@ -41,42 +41,27 @@
                 _ => throw new ArgumentException()
             };
             
-            async Task<object[,]> FetchTicker(long _)
-            {
-                var ticker = await DeribitSocket.GetTickerRaw(instrumentName);
-                var result = tickerAttributes
-                    .Select(attrName => ticker.ValueByPath("result." + attrName))
-                    .ToArray();
+            var observableId = $"GetTicker({instrumentName}, {string.Join(",", tickerAttributes)}, {updateInterval}, {spillVertically})";
 
-                if (spillVertically)
-                {
-                    return result.To2DArray(tickerAttributes.Length, 1);
-                }
-                else
-                {
-                    return result.To2DArray(1, tickerAttributes.Length);
-                }
-            }
-
-            var observableId = $"{instrumentName}({string.Join(",", tickerAttributes)})@{updateInterval}/{spillVertically}";
-
-            IObservable<object[,]> observableSource;
-
-            if (updateInterval > 0)
-            {
-                observableSource = Observable.Timer(TimeSpan.Zero, TimeSpan.FromSeconds(updateInterval))
-                    .Select(FetchTicker)
-                    .Concat();
-            }
-            else
-            {
-                observableSource = Observable.FromAsync(async () => await FetchTicker(0));
-            }
-
-            return RxExcel.Observe(
+            return CreatePeriodicObservable(
                 observableId,
-                null,
-                () => observableSource);
+                updateInterval,
+                async () =>
+                {
+                    var ticker = await DeribitSocket.GetTickerRaw(instrumentName);
+                    var result = tickerAttributes
+                        .Select(attrName => ticker.ValueByPath("result." + attrName))
+                        .ToArray();
+
+                    if (spillVertically)
+                    {
+                        return result.To2DArray(tickerAttributes.Length, 1);
+                    }
+                    else
+                    {
+                        return result.To2DArray(1, tickerAttributes.Length);
+                    }
+                });
         }
 
         [ExcelFunction(
@@ -93,24 +78,30 @@
                 Description = "Update interval (in seconds) - 0 to disable")]
             int updateInterval)
         {
-            async Task<decimal> FetchIndexPrice(long _)
-            {
-                return await DeribitSocket.GetIndexPrice(indexName);
-            }
-            
             var observableId = $"GetIndexPrice({indexName}, {updateInterval})";
 
-            IObservable<decimal> observableSource;
+            return CreatePeriodicObservable(
+                observableId,
+                updateInterval,
+                () => DeribitSocket.GetIndexPrice(indexName));
+        }
+
+        private static object CreatePeriodicObservable<TRes>(
+            string observableId,
+            int updateInterval,
+            Func<Task<TRes>> fetcher)
+        {
+            IObservable<TRes> observableSource;
 
             if (updateInterval > 0)
             {
                 observableSource = Observable.Timer(TimeSpan.Zero, TimeSpan.FromSeconds(updateInterval))
-                    .Select(FetchIndexPrice)
+                    .Select(async _ => await fetcher())
                     .Concat();
             }
             else
             {
-                observableSource = Observable.FromAsync(async () => await FetchIndexPrice(0));
+                observableSource = Observable.FromAsync(async () => await fetcher());
             }
 
             return RxExcel.Observe(
