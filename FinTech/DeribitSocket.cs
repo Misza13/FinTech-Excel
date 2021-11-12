@@ -45,6 +45,14 @@
             await Send(request, handler);
             return await handler.Task;
         }
+        
+        public async Task<JObject> GetTickerRaw(string instrumentName)
+        {
+            var request = new DeribitGetTickerRequest(instrumentName);
+            var handler = new ResponseHandlerBase<JObject>();
+            await Send(request, handler);
+            return await handler.Task;
+        }
 
         private async Task Send(IHasId request, IResponseHandler handler)
         {
@@ -69,7 +77,7 @@
         {
             void SetResult(string payload);
         }
-        
+
         private class ResponseHandlerBase<TRes> : IResponseHandler
         {
             private readonly TaskCompletionSource<TRes> _tcs =
