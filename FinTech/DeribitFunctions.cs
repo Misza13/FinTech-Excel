@@ -11,7 +11,7 @@
         internal static readonly DeribitSocket DeribitSocket = new DeribitSocket();
 
         [ExcelFunction(
-            Name = "Deribit.GetTicker",
+            Name = "Deribit.Ticker",
             Description = "Get ticker data from Deribit")]
         public static object GetTicker(
             [ExcelArgument(
@@ -81,7 +81,7 @@
 
         [ExcelFunction(
             Name = "Deribit.IndexPrice",
-            Description = "Retrieve the current index price value for given index name.")]
+            Description = "Retrieve the current index price value for given index name")]
         public static object GetIndexPrice(
             [ExcelArgument(
                 Name = "IndexName",
