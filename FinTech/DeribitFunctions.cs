@@ -4,7 +4,6 @@
     using System.Linq;
     using System.Reactive.Linq;
     using ExcelDna.Integration;
-    using Newtonsoft.Json.Linq;
 
     public static class DeribitFunctions
     {
@@ -45,9 +44,7 @@
                     {
                         var ticker = await DeribitSocket.GetTickerRaw(instrumentName);
                         var result = tickerAttributes
-                            .Select(attrName => ticker.SelectToken("result." + attrName))
-                            .Cast<JValue>()
-                            .Select(v => v.Value)
+                            .Select(attrName => ticker.ValueByPath("result." + attrName))
                             .ToArray();
                         return result;
                     })
