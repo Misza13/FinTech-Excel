@@ -79,6 +79,7 @@
         <Compile Include="DeribitSocket.cs" />
         <Compile Include="FinTechAddIn.cs" />
         <Compile Include="JsonExtensions.cs" />
+        <Compile Include="LinqExtensions.cs" />
         <Compile Include="Models\DeribitGetTickerRequest.cs" />
         <Compile Include="Models\DeribitGetTickerResponse.cs" />
         <Compile Include="Models\DeribitRpcRequest.cs" />

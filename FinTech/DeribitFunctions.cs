@@ -29,7 +29,10 @@
                 Description = "Update interval (in seconds) - 0 to disable")]
             int updateInterval,
             
-            bool spillVertically) //TODO: handle
+            [ExcelArgument(
+                Name = "SpillVertically",
+                Description = "Spill resulting values vertically")]
+            bool spillVertically)
         {
             var tickerAttributes = tickerAttributesIn switch
             {
@@ -38,18 +41,26 @@
                 _ => throw new ArgumentException()
             };
             
-            async Task<object[]> FetchTicker(long _)
+            async Task<object[,]> FetchTicker(long _)
             {
                 var ticker = await DeribitSocket.GetTickerRaw(instrumentName);
                 var result = tickerAttributes
                     .Select(attrName => ticker.ValueByPath("result." + attrName))
                     .ToArray();
-                return result;
+
+                if (spillVertically)
+                {
+                    return result.To2DArray(tickerAttributes.Length, 1);
+                }
+                else
+                {
+                    return result.To2DArray(1, tickerAttributes.Length);
+                }
             }
 
             var observableId = $"{instrumentName}({string.Join(",", tickerAttributes)})@{updateInterval}/{spillVertically}";
 
-            IObservable<object[]> observableSource;
+            IObservable<object[,]> observableSource;
 
             if (updateInterval > 0)
             {
