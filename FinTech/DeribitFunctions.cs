@@ -1,6 +1,7 @@
 ﻿namespace FinTech
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Reactive.Linq;
     using System.Threading.Tasks;
@@ -9,6 +10,8 @@
     public static class DeribitFunctions
     {
         internal static readonly DeribitSocket DeribitSocket = new DeribitSocket();
+
+        private static readonly Dictionary<string, object> Observables = new Dictionary<string, object>();
 
         [ExcelFunction(
             Name = "Deribit.Ticker",
@@ -93,15 +96,21 @@
         {
             IObservable<TRes> observableSource;
 
-            if (updateInterval > 0)
+            if (Observables.ContainsKey(observableId))
+            {
+                observableSource = (IObservable<TRes>) Observables[observableId];
+            }
+            else if (updateInterval > 0)
             {
                 observableSource = Observable.Timer(TimeSpan.Zero, TimeSpan.FromSeconds(updateInterval))
                     .Select(async _ => await fetcher())
                     .Concat();
+                Observables[observableId] = observableSource;
             }
             else
             {
                 observableSource = Observable.FromAsync(async () => await fetcher());
+                Observables[observableId] = observableSource;
             }
 
             return RxExcel.Observe(
