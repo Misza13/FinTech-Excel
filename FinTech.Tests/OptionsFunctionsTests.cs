@@ -89,6 +89,26 @@ namespace FinTech.Tests
             vega.Should().BeApproximately(values.Vega, 0.01);
         }
 
+        [TestCaseSource(nameof(OptionTestCaseGenerator))]
+        public void CallRho_ShouldHaveCorrectValue(OptionParameters parameters, OptionValues values)
+        {
+            //Act
+            var callRho = OptionsFunctions.RhoEuroCall(parameters.S, parameters.K, parameters.T, parameters.sigma, parameters.r);
+            
+            //Assert
+            callRho.Should().BeApproximately(values.CallRho, 0.01);
+        }
+
+        [TestCaseSource(nameof(OptionTestCaseGenerator))]
+        public void PutRhoShouldHaveCorrectValue(OptionParameters parameters, OptionValues values)
+        {
+            //Act
+            var putRho = OptionsFunctions.RhoEuroPut(parameters.S, parameters.K, parameters.T, parameters.sigma, parameters.r);
+            
+            //Assert
+            putRho.Should().BeApproximately(values.PutRho, 0.01);
+        }
+
         public static IEnumerable<TestCaseData> OptionTestCaseGenerator()
         {
             // Reference values calculated using https://option-price.com/index.php

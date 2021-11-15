@@ -275,6 +275,72 @@
             var (dPlus, _) = DPlusMinus(S, K, T, sigma, r);
             return S * Norm(dPlus) * Math.Sqrt(T) / 100;
         }
+        
+        [ExcelFunction(
+            Name = "Options.RhoEuroCall",
+            Description = "Rho of an european CALL option using B-S formula")]
+        public static double RhoEuroCall(
+            [ExcelArgument(
+                Name = "S",
+                Description = "Price of underlying instrument")]
+            double S,
+
+            [ExcelArgument(
+                Name = "K",
+                Description = "Option strike price")]
+            double K,
+
+            [ExcelArgument(
+                Name = "T",
+                Description = "Time to option expiration (in years)")]
+            double T,
+
+            [ExcelArgument(
+                Name = "sigma",
+                Description = "Annual volatility of underlying instrument")]
+            double sigma,
+
+            [ExcelArgument(
+                Name = "r",
+                Description = "Risk-free interest rate")]
+            double r)
+        {
+            var (_, dMinus) = DPlusMinus(S, K, T, sigma, r);
+            return K * T * Math.Exp(-r * T) * Phi(dMinus) / 100;
+        }
+        
+        [ExcelFunction(
+            Name = "Options.RhoEuroPut",
+            Description = "Rho of an european PUT option using B-S formula")]
+        public static double RhoEuroPut(
+            [ExcelArgument(
+                Name = "S",
+                Description = "Price of underlying instrument")]
+            double S,
+            
+            [ExcelArgument(
+                Name = "K",
+                Description = "Option strike price")]
+            double K,
+            
+            [ExcelArgument(
+                Name = "T",
+                Description = "Time to option expiration (in years)")]
+            double T,
+            
+            [ExcelArgument(
+                Name = "sigma",
+                Description = "Annual volatility of underlying instrument")]
+            double sigma,
+            
+            [ExcelArgument(
+                Name = "r",
+                Description = "Risk-free interest rate")]
+            double r)
+        {
+            var (_, dMinus) = DPlusMinus(S, K, T, sigma, r);
+            return -K * T * Math.Exp(-r * T) * Phi(-dMinus) / 100;
+        }
 
         private static (double, double) DPlusMinus(double S, double K, double T, double sigma, double r)
         {
