@@ -28,7 +28,7 @@
             double tolerance)
         {
             // Act
-            var result = DeribitFunctions.ShortPutLiquidationPrice(
+            var result = (double) DeribitFunctions.ShortPutLiquidationPrice(
                 S, K, T, sigma, r, sellPrice, investmentRatio);
 
             // Assert

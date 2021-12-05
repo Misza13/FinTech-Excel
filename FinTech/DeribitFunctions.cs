@@ -92,7 +92,7 @@
         [ExcelFunction(
             Name = "Deribit.ShortPutLiquidationPrice",
             Description = "Estimate the liquidation price of a short PUT position")]
-        public static double ShortPutLiquidationPrice(
+        public static object ShortPutLiquidationPrice(
             [ExcelArgument(
                 Name = "S",
                 Description = "Price of underlying instrument when the option was sold")]
@@ -149,9 +149,16 @@
                 return maintenanceMargin / marginBalance - 1;
             };
 
-            return mmRatio.FindRootByPseudoNewtonMethod(
+            var result = mmRatio.FindRootByPseudoNewtonMethod(
                 S * 0.75,
                 10);
+
+            if (double.IsNaN(result))
+            {
+                return ExcelError.ExcelErrorValue;
+            }
+
+            return result;
         }
 
         private static object CreatePeriodicObservable<TRes>(
