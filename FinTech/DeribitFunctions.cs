@@ -150,7 +150,7 @@
             };
 
             var result = mmRatio.FindRootByPseudoNewtonMethod(
-                S * 0.75,
+                (S + K) / 2,
                 10);
 
             if (double.IsNaN(result))
