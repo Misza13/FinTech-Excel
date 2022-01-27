@@ -1,13 +1,10 @@
 ﻿namespace FinTech
 {
-    using System;
     using ExcelDna.Integration;
-    using MathNet.Numerics.Distributions;
+    using QuantSharp;
 
     public static class OptionsFunctions
     {
-        private static readonly Normal Normal01 = new Normal(0, 1);
-        
         [ExcelFunction(
             Name = "Options.BlackScholesEuroCall",
             Description = "Price of an european CALL option using B-S formula")]
@@ -37,9 +34,7 @@
                 Description = "Risk-free interest rate")]
             double r)
         {
-            var (dPlus, dMinus) = DPlusMinus(S, K, T, sigma, r);
-            return + S * Phi(dPlus)
-                   - K * Math.Exp(-r * T) * Phi(dMinus);
+            return BlackScholesOptionsFunctions.EuroCall(S, K, T, sigma, r);
         }
         
         [ExcelFunction(
@@ -71,9 +66,7 @@
                 Description = "Risk-free interest rate")]
             double r)
         {
-            var (dPlus, dMinus) = DPlusMinus(S, K, T, sigma, r);
-            return - S * Phi(-dPlus)
-                   + K * Math.Exp(-r * T) * Phi(-dMinus);
+            return BlackScholesOptionsFunctions.EuroPut(S, K, T, sigma, r);
         }
 
         [ExcelFunction(
@@ -105,8 +98,7 @@
                 Description = "Risk-free interest rate")]
             double r)
         {
-            var (dPlus, _) = DPlusMinus(S, K, T, sigma, r);
-            return Phi(dPlus);
+            return BlackScholesOptionsFunctions.DeltaEuroCall(S, K, T, sigma, r);
         }
         
         [ExcelFunction(
@@ -138,8 +130,7 @@
                 Description = "Risk-free interest rate")]
             double r)
         {
-            var (dPlus, _) = DPlusMinus(S, K, T, sigma, r);
-            return -Phi(-dPlus);
+            return BlackScholesOptionsFunctions.DeltaEuroPut(S, K, T, sigma, r);
         }
         
         [ExcelFunction(
@@ -171,8 +162,7 @@
                 Description = "Risk-free interest rate")]
             double r)
         {
-            var (dPlus, _) = DPlusMinus(S, K, T, sigma, r);
-            return Norm(dPlus) / (S * sigma * Math.Sqrt(T));
+            return BlackScholesOptionsFunctions.GammaEuro(S, K, T, sigma, r);
         }
         
         [ExcelFunction(
@@ -204,9 +194,7 @@
                 Description = "Risk-free interest rate")]
             double r)
         {
-            var (dPlus, dMinus) = DPlusMinus(S, K, T, sigma, r);
-            return (-S * Norm(dPlus) * sigma / (2 * Math.Sqrt(T))
-                    - r * K * Math.Exp(-r * T) * Phi(dMinus)) / 365;
+            return BlackScholesOptionsFunctions.ThetaEuroCall(S, K, T, sigma, r) / 365;
         }
         
         [ExcelFunction(
@@ -238,9 +226,7 @@
                 Description = "Risk-free interest rate")]
             double r)
         {
-            var (dPlus, dMinus) = DPlusMinus(S, K, T, sigma, r);
-            return (- S * Norm(dPlus) * sigma / 2 / Math.Sqrt(T)
-                    + r * K * Math.Exp(-r * T) * Phi(-dMinus)) / 365;
+            return BlackScholesOptionsFunctions.ThetaEuroPut(S, K, T, sigma, r) / 365;
         }
         
         [ExcelFunction(
@@ -272,8 +258,39 @@
                 Description = "Risk-free interest rate")]
             double r)
         {
-            var (dPlus, _) = DPlusMinus(S, K, T, sigma, r);
-            return S * Norm(dPlus) * Math.Sqrt(T) / 100;
+            return BlackScholesOptionsFunctions.VegaEuro(S, K, T, sigma, r) / 100;
+        }
+        
+        [ExcelFunction(
+            Name = "Options.VommaEuro",
+            Description = "Vomma of an european option using B-S formula")]
+        public static double VommaEuro(
+            [ExcelArgument(
+                Name = "S",
+                Description = "Price of underlying instrument")]
+            double S,
+
+            [ExcelArgument(
+                Name = "K",
+                Description = "Option strike price")]
+            double K,
+
+            [ExcelArgument(
+                Name = "T",
+                Description = "Time to option expiration (in years)")]
+            double T,
+
+            [ExcelArgument(
+                Name = "sigma",
+                Description = "Annual volatility of underlying instrument")]
+            double sigma,
+
+            [ExcelArgument(
+                Name = "r",
+                Description = "Risk-free interest rate")]
+            double r)
+        {
+            return BlackScholesOptionsFunctions.VommaEuro(S, K, T, sigma, r) / 100;
         }
         
         [ExcelFunction(
@@ -305,8 +322,7 @@
                 Description = "Risk-free interest rate")]
             double r)
         {
-            var (_, dMinus) = DPlusMinus(S, K, T, sigma, r);
-            return K * T * Math.Exp(-r * T) * Phi(dMinus) / 100;
+            return BlackScholesOptionsFunctions.RhoEuroCall(S, K, T, sigma, r) / 100;
         }
         
         [ExcelFunction(
@@ -338,19 +354,7 @@
                 Description = "Risk-free interest rate")]
             double r)
         {
-            var (_, dMinus) = DPlusMinus(S, K, T, sigma, r);
-            return -K * T * Math.Exp(-r * T) * Phi(-dMinus) / 100;
+            return BlackScholesOptionsFunctions.RhoEuroPut(S, K, T, sigma, r) / 100;
         }
-
-        private static (double, double) DPlusMinus(double S, double K, double T, double sigma, double r)
-        {
-            var dPlus = (Math.Log(S / K) + (r + sigma * sigma / 2) * T) / (sigma * Math.Sqrt(T));
-            var dMinus = dPlus - sigma * Math.Sqrt(T);
-            return (dPlus, dMinus);
-        }
-
-        private static double Norm(double x) => Normal01.Density(x);
-
-        private static double Phi(double x) => Normal01.CumulativeDistribution(x);
     }
 }

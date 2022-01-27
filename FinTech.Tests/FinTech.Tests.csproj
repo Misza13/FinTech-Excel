@@ -61,7 +61,6 @@
     <ItemGroup>
         <Compile Include="AssertionExtensions.cs" />
         <Compile Include="DeribitFunctionsTests.cs" />
-        <Compile Include="OptionsFunctionsTests.cs" />
         <Compile Include="Properties\AssemblyInfo.cs" />
         <Compile Include="PseudoNewtonMethodTests.cs" />
     </ItemGroup>
