@@ -194,7 +194,7 @@
                 Description = "Risk-free interest rate")]
             double r)
         {
-            return BlackScholesOptionsFunctions.ThetaEuroCall(S, K, T, sigma, r) / 365;
+            return -BlackScholesOptionsFunctions.ThetaEuroCall(S, K, T, sigma, r) / 365;
         }
         
         [ExcelFunction(
@@ -226,7 +226,7 @@
                 Description = "Risk-free interest rate")]
             double r)
         {
-            return BlackScholesOptionsFunctions.ThetaEuroPut(S, K, T, sigma, r) / 365;
+            return -BlackScholesOptionsFunctions.ThetaEuroPut(S, K, T, sigma, r) / 365;
         }
         
         [ExcelFunction(
@@ -355,6 +355,70 @@
             double r)
         {
             return BlackScholesOptionsFunctions.RhoEuroPut(S, K, T, sigma, r) / 100;
+        }
+        
+        [ExcelFunction(
+            Name = "Options.ImpVolEuroCall",
+            Description = "Implied volatility of an european CALL option")]
+        public static double ImpliedVolatilityEuroCall(
+            [ExcelArgument(
+                Name = "S",
+                Description = "Price of underlying instrument")]
+            double S,
+            
+            [ExcelArgument(
+                Name = "K",
+                Description = "Option strike price")]
+            double K,
+            
+            [ExcelArgument(
+                Name = "T",
+                Description = "Time to option expiration (in years)")]
+            double T,
+            
+            [ExcelArgument(
+                Name = "r",
+                Description = "Risk-free interest rate")]
+            double r,
+            
+            [ExcelArgument(
+                Name = "C",
+                Description = "Price of the option")]
+            double C)
+        {
+            return BlackScholesOptionsFunctions.ImpliedVolatilityEuroCall(S, K, T, r, C);
+        }
+        
+        [ExcelFunction(
+            Name = "Options.ImplVolEuroPut",
+            Description = "Implied volatility of an european PUT option")]
+        public static double ImpliedVolatilityEuroPut(
+            [ExcelArgument(
+                Name = "S",
+                Description = "Price of underlying instrument")]
+            double S,
+            
+            [ExcelArgument(
+                Name = "K",
+                Description = "Option strike price")]
+            double K,
+            
+            [ExcelArgument(
+                Name = "T",
+                Description = "Time to option expiration (in years)")]
+            double T,
+            
+            [ExcelArgument(
+                Name = "r",
+                Description = "Risk-free interest rate")]
+            double r,
+            
+            [ExcelArgument(
+                Name = "P",
+                Description = "Price of the option")]
+            double P)
+        {
+            return BlackScholesOptionsFunctions.ImpliedVolatilityEuroPut(S, K, T, r, P);
         }
     }
 }
