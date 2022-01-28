@@ -34,7 +34,7 @@
                 Description = "Risk-free interest rate")]
             double r)
         {
-            return BlackScholesOptionsFunctions.EuroCall(S, K, T, sigma, r);
+            return BlackScholesEuropeanOptionsFunctions.CallPrice(S, K, T, sigma, r);
         }
         
         [ExcelFunction(
@@ -66,7 +66,7 @@
                 Description = "Risk-free interest rate")]
             double r)
         {
-            return BlackScholesOptionsFunctions.EuroPut(S, K, T, sigma, r);
+            return BlackScholesEuropeanOptionsFunctions.PutPrice(S, K, T, sigma, r);
         }
 
         [ExcelFunction(
@@ -98,7 +98,7 @@
                 Description = "Risk-free interest rate")]
             double r)
         {
-            return BlackScholesOptionsFunctions.DeltaEuroCall(S, K, T, sigma, r);
+            return BlackScholesEuropeanOptionsFunctions.CallDelta(S, K, T, sigma, r);
         }
         
         [ExcelFunction(
@@ -130,7 +130,7 @@
                 Description = "Risk-free interest rate")]
             double r)
         {
-            return BlackScholesOptionsFunctions.DeltaEuroPut(S, K, T, sigma, r);
+            return BlackScholesEuropeanOptionsFunctions.PutDelta(S, K, T, sigma, r);
         }
         
         [ExcelFunction(
@@ -162,7 +162,7 @@
                 Description = "Risk-free interest rate")]
             double r)
         {
-            return BlackScholesOptionsFunctions.GammaEuro(S, K, T, sigma, r);
+            return BlackScholesEuropeanOptionsFunctions.Gamma(S, K, T, sigma, r);
         }
         
         [ExcelFunction(
@@ -194,7 +194,7 @@
                 Description = "Risk-free interest rate")]
             double r)
         {
-            return -BlackScholesOptionsFunctions.ThetaEuroCall(S, K, T, sigma, r) / 365;
+            return -BlackScholesEuropeanOptionsFunctions.CallTheta(S, K, T, sigma, r) / 365;
         }
         
         [ExcelFunction(
@@ -226,7 +226,7 @@
                 Description = "Risk-free interest rate")]
             double r)
         {
-            return -BlackScholesOptionsFunctions.ThetaEuroPut(S, K, T, sigma, r) / 365;
+            return -BlackScholesEuropeanOptionsFunctions.PutTheta(S, K, T, sigma, r) / 365;
         }
         
         [ExcelFunction(
@@ -258,7 +258,7 @@
                 Description = "Risk-free interest rate")]
             double r)
         {
-            return BlackScholesOptionsFunctions.VegaEuro(S, K, T, sigma, r) / 100;
+            return BlackScholesEuropeanOptionsFunctions.Vega(S, K, T, sigma, r) / 100;
         }
         
         [ExcelFunction(
@@ -290,7 +290,7 @@
                 Description = "Risk-free interest rate")]
             double r)
         {
-            return BlackScholesOptionsFunctions.VommaEuro(S, K, T, sigma, r) / 100;
+            return BlackScholesEuropeanOptionsFunctions.Vomma(S, K, T, sigma, r) / 100;
         }
         
         [ExcelFunction(
@@ -322,7 +322,7 @@
                 Description = "Risk-free interest rate")]
             double r)
         {
-            return BlackScholesOptionsFunctions.RhoEuroCall(S, K, T, sigma, r) / 100;
+            return BlackScholesEuropeanOptionsFunctions.CallRho(S, K, T, sigma, r) / 100;
         }
         
         [ExcelFunction(
@@ -354,7 +354,7 @@
                 Description = "Risk-free interest rate")]
             double r)
         {
-            return BlackScholesOptionsFunctions.RhoEuroPut(S, K, T, sigma, r) / 100;
+            return BlackScholesEuropeanOptionsFunctions.PutRho(S, K, T, sigma, r) / 100;
         }
         
         [ExcelFunction(
@@ -386,7 +386,7 @@
                 Description = "Price of the option")]
             double C)
         {
-            return BlackScholesOptionsFunctions.ImpliedVolatilityEuroCall(S, K, T, r, C);
+            return BlackScholesEuropeanOptionsFunctions.CallImpliedVolatility(S, K, T, r, C);
         }
         
         [ExcelFunction(
@@ -418,7 +418,7 @@
                 Description = "Price of the option")]
             double P)
         {
-            return BlackScholesOptionsFunctions.ImpliedVolatilityEuroPut(S, K, T, r, P);
+            return BlackScholesEuropeanOptionsFunctions.PutImpliedVolatility(S, K, T, r, P);
         }
     }
 }

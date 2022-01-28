@@ -49,8 +49,8 @@
           <HintPath>..\packages\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
           <Private>True</Private>
         </Reference>
-        <Reference Include="QuantSharp, Version=0.1.1.0, Culture=neutral, PublicKeyToken=null">
-          <HintPath>..\packages\QuantSharp.0.1.1\lib\net48\QuantSharp.dll</HintPath>
+        <Reference Include="QuantSharp, Version=0.2.0.0, Culture=neutral, PublicKeyToken=null">
+          <HintPath>..\packages\QuantSharp.0.2.0\lib\net48\QuantSharp.dll</HintPath>
           <Private>True</Private>
         </Reference>
         <Reference Include="System" />
