@@ -45,7 +45,15 @@
             await Send(request, handler);
             return await handler.Task;
         }
-        
+
+        public async Task<DeribitGetInstrumentsResponse> GetInstruments(string currency, string kind)
+        {
+            var request = new DeribitGetInstrumentsRequest(currency, kind);
+            var handler = new ResponseHandlerBase<DeribitGetInstrumentsResponse>();
+            await Send(request, handler);
+            return await handler.Task;
+        }
+
         public async Task<JObject> GetTickerRaw(string instrumentName)
         {
             var request = new DeribitGetTickerRequest(instrumentName);

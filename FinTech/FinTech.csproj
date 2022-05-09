@@ -120,6 +120,8 @@
         <Compile Include="LinqExtensions.cs" />
         <Compile Include="Models\DeribitGetIndexPriceResponse.cs" />
         <Compile Include="Models\DeribitGetIndexRequest.cs" />
+        <Compile Include="Models\DeribitGetInstrumentsRequest.cs" />
+        <Compile Include="Models\DeribitGetInstrumentsResponse.cs" />
         <Compile Include="Models\DeribitGetTickerRequest.cs" />
         <Compile Include="Models\DeribitGetTickerResponse.cs" />
         <Compile Include="Models\DeribitRpcRequest.cs" />

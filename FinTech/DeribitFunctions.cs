@@ -6,12 +6,16 @@
     using System.Reactive.Linq;
     using System.Threading.Tasks;
     using ExcelDna.Integration;
+    using Models;
 
     public static class DeribitFunctions
     {
         internal static readonly DeribitSocket DeribitSocket = new DeribitSocket();
 
         private static readonly Dictionary<string, object> Observables = new Dictionary<string, object>();
+
+        private static readonly List<DeribitGetInstrumentsResponse.DeribitInstrumentData> optionCache =
+            new List<DeribitGetInstrumentsResponse.DeribitInstrumentData>(); 
 
         [ExcelFunction(
             Name = "Deribit.Ticker",
@@ -53,17 +57,9 @@
                 {
                     var ticker = await DeribitSocket.GetTickerRaw(instrumentName);
                     var result = tickerAttributes
-                        .Select(attrName => ticker.ValueByPath("result." + attrName))
-                        .ToArray();
+                        .Select(attrName => ticker.ValueByPath("result." + attrName));
 
-                    if (spillVertically)
-                    {
-                        return result.To2DArray(tickerAttributes.Length, 1);
-                    }
-                    else
-                    {
-                        return result.To2DArray(1, tickerAttributes.Length);
-                    }
+                    return result.ToExcelArray(spillVertically);
                 });
         }
 
@@ -87,6 +83,88 @@
                 observableId,
                 updateInterval,
                 () => DeribitSocket.GetIndexPrice(indexName));
+        }
+
+        [ExcelFunction(
+            Name = "Deribit.ListStrikes",
+            Description = "List strike prices around a given ATM price")]
+        public static object ListStrikes(
+            [ExcelArgument(
+                Name = "Expiration",
+                Description = "Deribit expiration date")]
+            string expiration,
+            
+            [ExcelArgument(
+                Name = "Around ATM",
+                Description = "Number of strikes to return around ATM")]
+            int aroundAtm,
+            
+            [ExcelArgument(
+                Name = "UpdateInterval",
+                Description = "Update interval (in seconds) - 0 to disable")]
+            int updateInterval,
+            
+            [ExcelArgument(
+                Name = "SpillVertically",
+                Description = "Spill resulting values vertically")]
+            bool spillVertically)
+        {
+            var observableId = $"ListStrikes({expiration}, {aroundAtm}, {updateInterval})";
+
+            return CreatePeriodicObservable(
+                observableId,
+                updateInterval,
+                async () =>
+                {
+                    if (optionCache.Count == 0)
+                    {
+                        var instruments = await DeribitSocket.GetInstruments("BTC", "option");
+                        
+                        lock (optionCache)
+                        {
+                            optionCache.AddRange(instruments.result);
+                        }
+                    }
+
+                    var indexPrice = await DeribitSocket.GetIndexPrice("btc_usd");
+                    
+                    var strikesBelow = optionCache
+                        .Where(i =>
+                            i.instrument_name.Contains(expiration) &&
+                            i.kind == "option" &&
+                            i.instrument_name.EndsWith("-C") &&
+                            i.strike <= indexPrice)
+                        .OrderByDescending(i => i.strike)
+                        .Take(aroundAtm)
+                        .Reverse()
+                        .Select(i => (object)(double)i.strike)
+                        .ToArray();
+
+                    if (strikesBelow.Length < aroundAtm)
+                    {
+                        strikesBelow = Repeat<object>("", aroundAtm - strikesBelow.Length)
+                            .Concat(strikesBelow).ToArray();
+                    }
+                    
+                    var strikesAbove = optionCache
+                        .Where(i =>
+                            i.instrument_name.Contains(expiration) &&
+                            i.kind == "option" &&
+                            i.instrument_name.EndsWith("-C") &&
+                            i.strike > indexPrice)
+                        .OrderBy(i => i.strike)
+                        .Take(aroundAtm)
+                        .Select(i => (object)(double)i.strike)
+                        .ToArray();
+                    
+                    if (strikesAbove.Length < aroundAtm)
+                    {
+                        strikesAbove = strikesAbove.Concat(Repeat<object>("", aroundAtm - strikesAbove.Length))
+                            .ToArray();
+                    }
+                    
+                    return strikesBelow.Concat(strikesAbove).ToExcelArray(spillVertically);
+                });
         }
 
         private static object CreatePeriodicObservable<TRes>(
@@ -117,6 +195,14 @@
                 observableId,
                 null,
                 () => observableSource);
+        }
+
+        private static IEnumerable<T> Repeat<T>(T value, int count)
+        {
+            for (var i = 0; i < count; i++)
+            {
+                yield return value;
+            }
         }
     }
 }
